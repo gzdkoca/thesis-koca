@@ -58,11 +58,11 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir = r'koca/datasets/ACDC/'
+root_dir = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/'
 
 # Define the paths to your train and test data files
-train_data_file = r'koca/datasets/ACDC/train.txt'
-test_data_file = r'koca/datasets/ACDC/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
 
 transforms_train = transforms.Compose([
     transforms.Resize((540, 960)),
