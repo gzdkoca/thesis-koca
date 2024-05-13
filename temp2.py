@@ -66,10 +66,10 @@ class CustomDataset(Dataset):
             image = self.transform(image)
         return image, label
 
-root_dir =r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/'
+root_dir =r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/'
 
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/test.txt'
 
 transforms_train = Compose([
     Resize((540, 960)), 
