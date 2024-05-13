@@ -162,7 +162,7 @@ test_accuary = []
 y_pred = []
 y_true = []
 
-num_epochs = 1
+num_epochs = 10
 start_time = time.time()
 
 for epoch in range(num_epochs):
