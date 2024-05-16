@@ -98,12 +98,12 @@ class CustomDataset(Dataset):
 
 
 # Define the root directory of your dataset
-root_dir_train = r'C:/Users/gozde/OneDrive/Masaüstü/ACDC'
-root_dir_test = r'C:/Users/gozde/OneDrive/Masaüstü/UAVID'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 
 # Define the paths to your train and test data files
-train_data_file = r'C:/Users/gozde/OneDrive/Masaüstü/ACDC/train.txt'
-test_data_file = r'C:/Users/gozde/OneDrive/Masaüstü/UAVID/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
