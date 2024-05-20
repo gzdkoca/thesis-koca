@@ -26,11 +26,16 @@ class CustomDataset(Dataset):
     def __init__(self, root_dir, data_file, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.class_to_label = {"day": 0, "fog": 1, "night": 2, "rain": 3}
+        self.class_to_label = { 
+            "fog": 0,
+            "night": 1,
+            "rain": 2,
+            "day": 3
+        }
         self.label_to_class = {v: k for k, v in self.class_to_label.items()}
-        self.classes = set(self.class_to_label.keys())  # Initialize with predefined classes
+        self.classes = set(self.class_to_label.keys())
         self.data = self.load_data(data_file)
-
+    
     def load_data(self, data_file):
         data = []
         print(f"Loading data from: {data_file}")
@@ -42,40 +47,50 @@ class CustomDataset(Dataset):
                     print(f"File not found: {img_path}")
                     continue
                 label = self.get_label(img_path)
-                data.append((img_path, label))
+                if label is not None:
+                    data.append((img_path, label))
+                else:
+                    print(f"Class name is None for path: {img_path}")
         return data
-    
-    def get_label(self, img_path):
-        parts = img_path.split(os.sep)
-        class_name = None
-        if 'clear_from_cityscapes' in parts or 'day' in parts:
-            class_name = 'day'
-        elif 'fog' in parts:
-            class_name = 'fog'
-        elif 'night' in parts:
-            class_name = 'night'
-        elif 'rain' in parts:
-            class_name = 'rain'
-        
-        if class_name is None:
-            print(f"Class name is None for path: {img_path}")  
-        else:
-            if class_name not in self.classes:
-                self.classes.add(class_name)
-        return self.class_to_label.get(class_name, -1)  # Return -1 if class name not found in mapping
 
+    def get_label(self, img_path):
+        parts = img_path.replace('\\', '/').split('/')
+        class_name = None
     
+        # Extract class name based on known structure
+        for part in parts:
+            if 'Opt_' in part:
+                class_name = part.split('_')[2]  # Extract the part after 'Opt_'
+                break
+
+        if class_name == "ClearNoon":
+            class_name = "day"
+        if class_name == "MidFoggyNoon":
+            class_name = "fog"
+        if class_name == "ClearNight":
+            class_name = "night"
+        if class_name == "HardRainNoon":
+            class_name = "rain"
+    
+        if class_name is None:
+            print(f"Class name is None for path: {img_path}")    
+        return self.class_to_label.get(class_name, None)
+
     def print_class_distribution(self):
         class_counts = {class_name: 0 for class_name in self.classes}
         for _, label in self.data:
             class_name = self.label_to_class.get(label)
-            if class_name is not None:
+            if class_name in self.classes:  # Ensure only desired classes are counted
                 class_counts[class_name] += 1
-            else:
-                print(f"Label {label} not found in label_to_class mapping.")  # Debug print statement
         print("Class Distribution:")
         for class_name, count in class_counts.items():
             print(f"{class_name}: {count}")
+
+    def change_class_name(self, old_name, new_name):
+        if old_name in self.class_to_label:
+            label = self.class_to_label.pop(old_name)
+            self.class_to_label[new_name] = label
+            self.label_to_class[label] = new_name
 
     def __len__(self):
         return len(self.data)
@@ -88,12 +103,12 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
@@ -115,6 +130,15 @@ try:
 except Exception as e:
     print(f"Error initializing dataset: {e}")
 
+# Print class distribution
+print("\nTraining Dataset:")
+train_dataset.print_class_distribution()
+print("\nTest Dataset:")
+test_dataset.print_class_distribution()
+
+# Create data loaders for training and testing
+train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 print('Train dataset size:', len(train_dataset))
 print('Test dataset size:', len(test_dataset))
@@ -122,7 +146,7 @@ print('Training class names:', train_dataset.classes)
 print('Test class names:', test_dataset.classes)
 
 # Print class distribution
-print("\nTraining Dataset")
+print("\nTraining Dataset:")
 train_dataset.print_class_distribution()
 print("\nTest Dataset:")
 test_dataset.print_class_distribution()
@@ -148,12 +172,17 @@ iterator = iter(train_dataloader)
 inputs, classes = next(iterator)
 out = torchvision.utils.make_grid(inputs[:4])
 
+# Print class names for debugging
+class_names = list(train_dataset.classes)
+print("Class names list:", class_names)
+
 # Ensure the titles are correct
 titles = [train_dataset.label_to_class[x.item()] for x in classes[:4]]
 print("Titles:", titles)
 
 imshow(out, title=" | ".join(titles))
- 
+
+
 # Define the network architecture
 model = models.resnet18(pretrained=True)
 num_features = model.fc.in_features
