@@ -119,7 +119,7 @@ class CustomDataset(Dataset):
 
 # Define the root directory of your dataset
 root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 
 # Define the paths to your train and test data files
 train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt'
