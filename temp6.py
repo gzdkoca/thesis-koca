@@ -21,7 +21,6 @@ import time
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from PIL import Image
 
-
 class CustomDataset(Dataset):
     def __init__(self, root_dir, data_file, transform=None):
         self.root_dir = root_dir
@@ -54,48 +53,30 @@ class CustomDataset(Dataset):
         return data
 
     def get_label(self, img_path):
+        # Normalize the path for consistent parsing
         img_path = img_path.replace('\\', '/')
+        
+        # Split the path into parts
         parts = img_path.split('/')
         
-        class_name = None
-    
-        # Extract class name based on known structure
-        for part in parts:
-            if 'Opt_' in part:
-                class_name = part.split('_')[2]  # Extract the part after 'Opt_'
-                break
-    
-        # Additional checks for specific class names
-        if 'clear_from_cityscapes' in parts:
-            class_name = 'clear_from_cityscapes'
-        elif 'day' in parts or 'ClearNoon' in parts:
-            class_name = 'day'
-        elif 'fog' in parts or 'MidFoggyNoon' in parts:
-            class_name = 'fog'
-        elif 'night' in parts or 'ClearNight' in parts:
-            class_name = 'night'
-        elif 'rain' in parts or 'HardRainNoon' in parts:
-            class_name = 'rain'
-    
-        # Normalize certain class names
-        if class_name in ["ClearNoon", "day", "clear_from_cityscapes"]:
-            class_name = "day"
-        elif class_name in ["MidFoggyNoon", "fog"]:
-            class_name = "fog"
-        elif class_name in ["ClearNight", "night"]:
-            class_name = "night"
-        elif class_name in ["HardRainNoon", "rain"]:
-            class_name = "rain"
-    
-        if class_name is None:
-            print(f"Class name is None for path: {img_path}")
-        return self.class_to_label.get(class_name, None)
+        if len(parts) >= 4:
+            class_name = parts[-4]
+            if class_name in ["ClearNight", "ClearNoon", "MidFoggyNoon", "HardRainNoon"]:
+                if class_name == "ClearNight":
+                    return self.class_to_label["night"]
+                elif class_name == "ClearNoon":
+                    return self.class_to_label["day"]
+                elif class_name == "MidFoggyNoon":
+                    return self.class_to_label["fog"]
+                elif class_name == "HardRainNoon":
+                    return self.class_to_label["rain"]
+        return None
 
     def print_class_distribution(self):
         class_counts = {class_name: 0 for class_name in self.classes}
         for _, label in self.data:
             class_name = self.label_to_class.get(label)
-            if class_name in self.classes:  # Ensure only desired classes are counted
+            if class_name in self.classes:
                 class_counts[class_name] += 1
         print("Class Distribution:")
         for class_name, count in class_counts.items():
@@ -118,12 +99,12 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
@@ -160,10 +141,6 @@ train_dataset.print_class_distribution()
 print("\nTest Dataset:")
 test_dataset.print_class_distribution()
 
-# Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
     input = input.numpy().transpose((1, 2, 0))
@@ -186,10 +163,11 @@ class_names = list(train_dataset.classes)
 print("Class names list:", class_names)
 
 # Ensure the titles are correct
-titles = [train_dataset.label_to_class[x.item()] for x in classes[:4]]
+titles = [train_dataset.label_to_class[x] for x in classes[:4].tolist()]
 print("Titles:", titles)
 
 imshow(out, title=" | ".join(titles))
+
  
 # Define the network architecture
 model = models.resnet18(pretrained=True)
@@ -329,7 +307,6 @@ plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Accuracy over time')
 plt.grid(True)
 
-plt.savefig('accuracy_plot.png')  # Save the accuracy plot
 
 # loss
 plt.subplot(1, 2, 2)
@@ -340,7 +317,7 @@ plt.ylabel('Loss')
 plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Loss over time')
 plt.grid(True)
-plt.savefig('loss_plot.png')  # Save the loss plot
+plt.savefig('acc_loss_plot(syn-syn).png')  # Save the loss plot
 
 plt.tight_layout()
 plt.show()
@@ -354,9 +331,12 @@ print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred))
 
 cf_matrix = confusion_matrix(y_true, y_pred)
-df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes], columns = [i for i in classes])
-plt.figure(figsize = (7,7))
+df_cm = pd.DataFrame(cf_matrix, index=classes, columns=classes)
+plt.figure(figsize=(10, 8))  
 plt.title("Confusion matrix: ")
-sn.heatmap(df_cm, annot=True)
-plt.savefig('confusion_matrix.png')  # Save the confusion matrix plot
+sns.heatmap(df_cm, annot=True, fmt='d', cmap='Blues', annot_kws={"size": 10})  
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+
+plt.savefig('confusion_matrix(syn-syn).png', bbox_inches='tight') 
 plt.show()
