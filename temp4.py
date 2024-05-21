@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 15 20:31:06 2024
+Created on Mon May 20 23:25:19 2024
 
 @author: gozde
 """
@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import time
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from PIL import Image
-
 
 class CustomDataset(Dataset):
     def __init__(self, root_dir, data_file, transform=None):
@@ -54,27 +53,32 @@ class CustomDataset(Dataset):
         return data
 
     def get_label(self, img_path):
-        parts = img_path.replace('\\', '/').split('/')
-        class_name = None
-    
-        # Extract class name based on known structure
-        for part in parts:
-            if 'Opt_' in part:
-                class_name = part.split('_')[2]  # Extract the part after 'Opt_'
-                break
-
-        if class_name == "ClearNoon":
-            class_name = "day"
-        if class_name == "MidFoggyNoon":
-            class_name = "fog"
-        if class_name == "ClearNight":
-            class_name = "night"
-        if class_name == "HardRainNoon":
-            class_name = "rain"
-    
-        if class_name is None:
-            print(f"Class name is None for path: {img_path}")    
-        return self.class_to_label.get(class_name, None)
+        # Normalize the path for consistent parsing
+        img_path = img_path.replace('\\', '/')
+        
+        # Split the path into parts
+        parts = img_path.split('/')
+        
+        # Handle clear_from_cityscapes class separately
+        if len(parts) >= 5 and parts[-3] == "clear_from_cityscapes":  
+            class_name = parts[-3]  # Adjusted index for clear_from_cityscapes class
+            if class_name == "clear_from_cityscapes":
+                return self.class_to_label["day"]  # Assigning clear_from_cityscapes to "day" class
+            return None  # Return None if class name is not recognized for clear_from_cityscapes
+        
+        # Handle other classes
+        if len(parts) >= 4:
+            class_name = parts[-4]
+            if class_name in ["ClearNight", "ClearNoon", "MidFoggyNoon", "HardRainNoon", "night", "fog", "rain", "day"]:
+                if class_name == "ClearNight" or class_name == "night":
+                    return self.class_to_label["night"]
+                elif class_name in ["ClearNoon", "day"]:
+                    return self.class_to_label["day"]
+                elif class_name == "MidFoggyNoon" or class_name == "fog":
+                    return self.class_to_label["fog"]
+                elif class_name == "HardRainNoon" or class_name == "rain":
+                    return self.class_to_label["rain"]
+        return None
 
     def print_class_distribution(self):
         class_counts = {class_name: 0 for class_name in self.classes}
@@ -103,12 +107,12 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
@@ -129,12 +133,6 @@ try:
     test_dataset = CustomDataset(root_dir_test, test_data_file, transform=transforms_test)
 except Exception as e:
     print(f"Error initializing dataset: {e}")
-
-# Print class distribution
-print("\nTraining Dataset:")
-train_dataset.print_class_distribution()
-print("\nTest Dataset:")
-test_dataset.print_class_distribution()
 
 # Create data loaders for training and testing
 train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
@@ -182,7 +180,7 @@ print("Titles:", titles)
 
 imshow(out, title=" | ".join(titles))
 
-
+ 
 # Define the network architecture
 model = models.resnet18(pretrained=True)
 num_features = model.fc.in_features
@@ -320,6 +318,7 @@ plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Accuracy over time')
 plt.grid(True)
 
+
 # loss
 plt.subplot(1, 2, 2)
 plt.plot(np.arange(1, num_epochs+1), train_loss, '-o')
@@ -329,6 +328,7 @@ plt.ylabel('Loss')
 plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Loss over time')
 plt.grid(True)
+plt.savefig('acc_loss_plot(syn-acdc).png')  # Save the loss plot
 
 plt.tight_layout()
 plt.show()
@@ -342,7 +342,12 @@ print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred))
 
 cf_matrix = confusion_matrix(y_true, y_pred)
-df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes], columns = [i for i in classes])
-plt.figure(figsize = (7,7))
-plt.title("Confusion matrix for Skin Cancer classification ")
-sn.heatmap(df_cm, annot=True)
+df_cm = pd.DataFrame(cf_matrix, index=classes, columns=classes)
+plt.figure(figsize=(10, 8))  
+plt.title("Confusion matrix: ")
+sns.heatmap(df_cm, annot=True, fmt='d', cmap='Blues', annot_kws={"size": 10})  
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+
+plt.savefig('confusion_matrix(syn-acdc).png', bbox_inches='tight') 
+plt.show()
