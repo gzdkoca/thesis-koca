@@ -118,12 +118,12 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
@@ -314,6 +314,7 @@ for i, acc in enumerate(class_acc_test):
     print(f'Testing Accuracy for {class_names[i]}: {acc:.2f}%')
 
 #####
+
 # Printing accuracy and loss plots
 
 plt.figure(figsize=(12, 6))
@@ -328,6 +329,8 @@ plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Accuracy over time')
 plt.grid(True)
 
+plt.savefig('accuracy_plot.png')  # Save the accuracy plot
+
 # loss
 plt.subplot(1, 2, 2)
 plt.plot(np.arange(1, num_epochs+1), train_loss, '-o')
@@ -337,6 +340,7 @@ plt.ylabel('Loss')
 plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Loss over time')
 plt.grid(True)
+plt.savefig('loss_plot.png')  # Save the loss plot
 
 plt.tight_layout()
 plt.show()
@@ -352,5 +356,7 @@ print('Classification report: \n', classification_report(y_true, y_pred))
 cf_matrix = confusion_matrix(y_true, y_pred)
 df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes], columns = [i for i in classes])
 plt.figure(figsize = (7,7))
-plt.title("Confusion matrix for Skin Cancer classification ")
+plt.title("Confusion matrix: ")
 sn.heatmap(df_cm, annot=True)
+plt.savefig('confusion_matrix.png')  # Save the confusion matrix plot
+plt.show()
