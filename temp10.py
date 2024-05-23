@@ -102,7 +102,7 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVId'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 
 # Define the paths to your train and test data files
