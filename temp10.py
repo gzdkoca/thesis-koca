@@ -333,10 +333,13 @@ print("Accuracy on Training set: ",accuracy_score(y_true, y_pred))
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred))
 
-cf_matrix = confusion_matrix(y_true, y_pred)
-df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes], columns = [i for i in classes])
-plt.figure(figsize = (7,7))
-plt.title("Confusion matrix ")
-sn.heatmap(df_cm, annot=True)
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
-plt.savefig('confusion_matrix_uavid-uavid.png', bbox_inches='tight')
+cm = confusion_matrix(y_true, y_pred)
+
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+disp.plot(cmap=plt.cm.Blues)
+plt.title('Confusion Matrix')
+plt.show()
+
+plt.savefig('confusion_matrix_uavid-uavid111.png', bbox_inches='tight')
