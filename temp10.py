@@ -25,14 +25,14 @@ class CustomDataset(Dataset):
     def __init__(self, root_dir, data_file, transform=None):
         self.root_dir = root_dir
         self.transform = transform
-        self.class_to_label = {
+        self.class_to_label = { 
             "fog": 0,
             "night": 1,
             "rain": 2,
             "day": 3
         }
         self.label_to_class = {v: k for k, v in self.class_to_label.items()}
-        self.classes = {'day', 'night', 'rain', 'fog'}
+        self.classes = set(self.class_to_label.keys())
         self.data = self.load_data(data_file)
     
     def load_data(self, data_file):
@@ -53,43 +53,27 @@ class CustomDataset(Dataset):
         return data
 
     def get_label(self, img_path):
+        # Normalize the path for consistent parsing
         img_path = img_path.replace('\\', '/')
+        
+        # Split the path into parts
         parts = img_path.split('/')
         
-        class_name = None
-    
-        # Extract class name based on known structure
-        for part in parts:
-            if 'Opt_' in part:
-                class_name = part.split('_')[2]  # Extract the part after 'Opt_'
-                break
-    
-        # Additional checks for specific class names
-        if 'clear_from_cityscapes' in parts:
-            class_name = 'clear_from_cityscapes'
-        elif 'day' in parts or 'ClearNoon' in parts:
-            class_name = 'day'
-        elif 'fog' in parts or 'MidFoggyNoon' in parts:
-            class_name = 'fog'
-        elif 'night' in parts or 'ClearNight' in parts:
-            class_name = 'night'
-        elif 'rain' in parts or 'HardRainNoon' in parts:
-            class_name = 'rain'
-    
-        # Normalize certain class names
-        if class_name in ["ClearNoon", "day", "clear_from_cityscapes"]:
-            class_name = "day"
-        elif class_name in ["MidFoggyNoon", "fog"]:
-            class_name = "fog"
-        elif class_name in ["ClearNight", "night"]:
-            class_name = "night"
-        elif class_name in ["HardRainNoon", "rain"]:
-            class_name = "rain"
-    
-        if class_name is None:
-            print(f"Class name is None for path: {img_path}")
-        return self.class_to_label.get(class_name, None)
-
+        # Check if the directory structure matches the expected format
+        if len(parts) >= 4:
+            class_name = parts[-3]
+            if class_name in self.class_to_label:
+                return self.class_to_label[class_name]
+            elif class_name in ["day", "night", "fog", "rain"]:
+                if class_name == "day":
+                    return self.class_to_label["day"]
+                elif class_name == "night":
+                    return self.class_to_label["night"]
+                elif class_name == "fog":
+                    return self.class_to_label["fog"]
+                elif class_name == "rain":
+                    return self.class_to_label["rain"]
+        return None
 
     def print_class_distribution(self):
         class_counts = {class_name: 0 for class_name in self.classes}
@@ -118,12 +102,12 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
-root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVId'
+root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
-test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/test.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt'
+test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/test.txt'
 
 # Define the transformations
 transforms_train = Compose([
