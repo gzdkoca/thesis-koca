@@ -326,23 +326,6 @@ plt.tight_layout()
 plt.show()
 
 #####
-# Confusion Matrix
-
-classes = test_dataset.classes
-print("Accuracy on Training set: ",accuracy_score(y_true, y_pred))
-print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
-print('Classification report: \n', classification_report(y_true, y_pred))
-
-cf_matrix = confusion_matrix(y_true, y_pred)
-df_cm = pd.DataFrame(cf_matrix, index=classes, columns=classes)
-plt.figure(figsize=(10, 8))  
-plt.title("Confusion matrix: ")
-sns.heatmap(df_cm, annot=True, fmt='d', cmap='Blues', annot_kws={"size": 10})  
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
-
-plt.savefig('confusion_matrix(---).png', bbox_inches='tight') 
-plt.show()
 
 
 classes = test_dataset.classes
@@ -353,7 +336,7 @@ print('Classification report: \n', classification_report(y_true, y_pred))
 cf_matrix = confusion_matrix(y_true, y_pred)
 df_cm = pd.DataFrame(cf_matrix, index = [i for i in classes], columns = [i for i in classes])
 plt.figure(figsize = (7,7))
-plt.title("Confusion matrix for Skin Cancer classification ")
+plt.title("Confusion matrix ")
 sn.heatmap(df_cm, annot=True)
 
 plt.savefig('confusion_matrix(uavid-uavid).png', bbox_inches='tight')
