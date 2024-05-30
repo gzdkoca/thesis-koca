@@ -244,9 +244,9 @@ for epoch in range(num_epochs):
             running_corrects += torch.sum(preds == labels.data)
 
             # Save predictions and true labels
-            outputs = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
+            outputs = (torch.max(torch.exp(outputs), 1)[1]).cpu().numpy()  # Transfer to CPU before converting to numpy
             y_pred.extend(outputs)  # Save Prediction
-            labels = labels.data.cpu().numpy()
+            labels = labels.cpu().numpy()  # Transfer to CPU before converting to numpy
             y_true.extend(labels)  # Save Truth
 
         epoch_loss = running_loss / len(test_dataset)
