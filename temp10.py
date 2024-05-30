@@ -130,8 +130,8 @@ except Exception as e:
     print(f"Error initializing dataset: {e}")
 
 # Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
 
 print('Train dataset size:', len(train_dataset))
 print('Test dataset size:', len(test_dataset))
@@ -320,7 +320,7 @@ plt.ylabel('Loss')
 plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Loss over time')
 plt.grid(True)
-plt.savefig('acc_loss_plot(syn-syn).png')  # Save the loss plot
+plt.savefig('acc_loss_plot_uu-16.png')  # Save the loss plot
 
 plt.tight_layout()
 plt.show()
@@ -346,4 +346,4 @@ fig, ax = plt.subplots(figsize=(10, 7))  # Increase figure size for better reada
 disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')  # Ensure annotations are integers
 plt.title('Confusion Matrix', fontsize=18)
 plt.show()
-plt.savefig('confusion_matrix_uavid-uavid_3.png', bbox_inches='tight')
+plt.savefig('confusion_matrix_uavid-uavid_16.png', bbox_inches='tight')
