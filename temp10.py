@@ -171,7 +171,7 @@ print("Titles:", titles)
 
 imshow(out, title=" | ".join(titles))
 
- 
+###### 2
 # Define the network architecture
 model = models.resnet18(pretrained=True)
 num_features = model.fc.in_features
@@ -182,40 +182,21 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
 # Adding a fully-connected layer for classification
-model.fc = nn.Linear(num_features, 4)
+model.fc = nn.Linear(num_features, 5)
 model = model.to(device)
 
 # loss Function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)  #(lr changed from 0.0001 to 0.001)
 
 torch.manual_seed(42)
 torch.cuda.manual_seed(42)
 
-def class_accuracy(model, dataloader, num_classes):
-    class_correct = list(0. for _ in range(num_classes))
-    class_total = list(0. for _ in range(num_classes))
-
-    model.eval()
-    with torch.no_grad():
-        for inputs, labels in dataloader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            outputs = model(inputs)
-            _, predicted = torch.max(outputs, 1)
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-
-    class_accuracy = [class_correct[i] / class_total[i] * 100. if class_total[i] != 0 else 0 for i in range(num_classes)]
-    return class_accuracy
-
+# Lists to store training and testing metrics
 train_loss = []
-train_accuary = []
+train_accuracy = []
 test_loss = []
-test_accuary = []
+test_accuracy = []
 y_pred = []
 y_true = []
 
@@ -226,7 +207,7 @@ for epoch in range(num_epochs):
     print("Epoch {} running".format(epoch))
     # Training
     model.train()
-    running_loss = 0.
+    running_loss = 0.0
     running_corrects = 0
 
     for i, (inputs, labels) in enumerate(train_dataloader):
@@ -238,63 +219,58 @@ for epoch in range(num_epochs):
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-        running_loss += loss.item()
-        running_corrects += torch.sum(preds == labels.data).item()
+        running_loss += loss.item() * inputs.size(0)
+        running_corrects += torch.sum(preds == labels.data)
 
     epoch_loss = running_loss / len(train_dataset)
-    epoch_acc = running_corrects / len(train_dataset) * 100.
+    epoch_acc = running_corrects.double() / len(train_dataset) * 100.0
     train_loss.append(epoch_loss)
-    train_accuary.append(epoch_acc)
-    print('[Train #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() -start_time))
+    train_accuracy.append(epoch_acc)
+    print('[Train #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch + 1, epoch_loss, epoch_acc, time.time() - start_time))
 
     # Testing
     model.eval()
     with torch.no_grad():
-        running_loss = 0.
+        running_loss = 0.0
         running_corrects = 0
+
         for inputs, labels in test_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
             _, preds = torch.max(outputs, 1)
             loss = criterion(outputs, labels)
-            running_loss += loss.item()
-            running_corrects += torch.sum(preds == labels.data).item()
+            running_loss += loss.item() * inputs.size(0)
+            running_corrects += torch.sum(preds == labels.data)
 
             # Save predictions and true labels
             outputs = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
-            y_pred.extend(outputs) # Save Prediction
+            y_pred.extend(outputs)  # Save Prediction
             labels = labels.data.cpu().numpy()
-            y_true.extend(labels) # Save Truth
+            y_true.extend(labels)  # Save Truth
 
         epoch_loss = running_loss / len(test_dataset)
-        epoch_acc = running_corrects / len(test_dataset) * 100.
+        epoch_acc = running_corrects.double() / len(test_dataset) * 100.0
         test_loss.append(epoch_loss)
-        test_accuary.append(epoch_acc)
-        print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time()- start_time))
+        test_accuracy.append(epoch_acc)
+        print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch + 1, epoch_loss, epoch_acc, time.time() - start_time))
 
-# printing accuracy and loss values for training and test
-df = pd.DataFrame({'Training Accuracy': train_accuary, 'Test Accuracy': test_accuary, 'Training Loss': train_loss, 'Test Loss':test_loss})
-print("Training: Selma (800), Test: Selma (400)")
+# Print accuracy and loss values for training and test
+df = pd.DataFrame({'Training Accuracy': train_accuracy, 'Test Accuracy': test_accuracy, 'Training Loss': train_loss, 'Test Loss': test_loss})
 print(df)
 
-####
-# class accuracies
-num_classes = len(train_dataset.classes)
-class_names = ['day', 'fog', 'night', 'rain']
+# Compute accuracy, confusion matrix, and classification report
+print("Accuracy on Test set: ", accuracy_score(y_true, y_pred))
+print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
+print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
 
-class_acc_train = class_accuracy(model, train_dataloader, num_classes)
-class_acc_test = class_accuracy(model, test_dataloader, num_classes)
+# Create confusion matrix
+cm = confusion_matrix(y_true, y_pred)
 
-train_acc_df = pd.DataFrame({'Class': class_names, 'Training Accuracy': class_acc_train, 'Testing Accuracy': class_acc_test})
-
-for i, acc in enumerate(class_acc_train):
-    print(f'Training Accuracy for {class_names[i]}: {acc:.2f}%')
-
-for i, acc in enumerate(class_acc_test):
-    print(f'Testing Accuracy for {class_names[i]}: {acc:.2f}%')
-
-#####
+# Calculate class accuracies
+class_accuracies = cm.diagonal() / cm.sum(axis=1)
+for i, class_name in enumerate(class_names):
+    print(f'Accuracy for {class_name}: {class_accuracies[i] * 100:.2f}%')
 
 # Printing accuracy and loss plots
 
@@ -320,7 +296,7 @@ plt.ylabel('Loss')
 plt.legend(['Train', 'Test'])
 plt.title('Train vs Test Loss over time')
 plt.grid(True)
-plt.savefig('acc_loss_plot_uu-16.png')  # Save the loss plot
+plt.savefig('acc_loss_plot_uu-16_0_001.png')  # Save the loss plot
 
 plt.tight_layout()
 plt.show()
@@ -346,4 +322,4 @@ fig, ax = plt.subplots(figsize=(10, 7))  # Increase figure size for better reada
 disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')  # Ensure annotations are integers
 plt.title('Confusion Matrix', fontsize=18)
 plt.show()
-plt.savefig('confusion_matrix_uavid-uavid_16.png', bbox_inches='tight')
+plt.savefig('confusion_matrix_uavid-uavid_16_0_001.png', bbox_inches='tight')
