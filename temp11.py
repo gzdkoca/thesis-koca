@@ -203,7 +203,7 @@ model = model.to(device)
 
 # loss Function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
 
 torch.manual_seed(42)
 torch.cuda.manual_seed(42)
