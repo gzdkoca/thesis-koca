@@ -15,7 +15,7 @@ import pandas as pd
 import torchvision
 from torch.utils.data import Dataset, DataLoader
 from torchvision import models
-from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 import time
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
