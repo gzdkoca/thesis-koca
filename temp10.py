@@ -130,8 +130,8 @@ except Exception as e:
     print(f"Error initializing dataset: {e}")
 
 # Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
 print('Train dataset size:', len(train_dataset))
 print('Test dataset size:', len(test_dataset))
@@ -327,19 +327,23 @@ plt.show()
 
 #####
 
-
 classes = test_dataset.classes
-print("Accuracy on Training set: ",accuracy_score(y_true, y_pred))
+# Compute accuracy, confusion matrix, and classification report
+print("Accuracy on Training set: ", accuracy_score(y_true, y_pred))
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
-print('Classification report: \n', classification_report(y_true, y_pred))
+print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
 
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-
+# Create confusion matrix
 cm = confusion_matrix(y_true, y_pred)
 
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
-disp.plot(cmap=plt.cm.Blues)
-plt.title('Confusion Matrix')
-plt.show()
+class_accuracies = cm.diagonal() / cm.sum(axis=1)
+for i, class_name in enumerate(class_names):
+    print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
 
-plt.savefig('confusion_matrix_uavid-uavid111.png', bbox_inches='tight')
+# Plot confusion matrix using ConfusionMatrixDisplay
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+fig, ax = plt.subplots(figsize=(10, 7))  # Increase figure size for better readability
+disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')  # Ensure annotations are integers
+plt.title('Confusion Matrix', fontsize=18)
+plt.show()
+plt.savefig('confusion_matrix_uavid-uavid_3.png', bbox_inches='tight')
