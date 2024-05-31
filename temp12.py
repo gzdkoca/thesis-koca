@@ -212,6 +212,9 @@ for epoch in range(num_epochs):
     running_loss = 0.
     running_corrects = 0
 
+    epoch_train_y_pred = []
+    epoch_train_y_true = []
+
     for i, (inputs, labels) in enumerate(train_dataloader):
         inputs = inputs.to(device)
         labels = labels.to(device)
@@ -224,21 +227,25 @@ for epoch in range(num_epochs):
         running_loss += loss.item()
         running_corrects += torch.sum(preds == labels.data).item()
 
-        # Save predictions and true labels
-        train_y_pred.extend(preds.cpu().numpy())
-        train_y_true.extend(labels.cpu().numpy())
+        # Save predictions and true labels for epoch-wise accuracy calculation
+        epoch_train_y_pred.extend(preds.cpu().numpy())
+        epoch_train_y_true.extend(labels.cpu().numpy())
 
     epoch_loss = running_loss / len(train_dataset)
-    epoch_acc = running_corrects / len(train_dataset) * 100.
+    epoch_acc = accuracy_score(epoch_train_y_true, epoch_train_y_pred) * 100
     train_loss.append(epoch_loss)
     train_accuracy.append(epoch_acc)
     print('[Train #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() - start_time))
 
     # Testing
     model.eval()
+    running_loss = 0.
+    running_corrects = 0
+
+    epoch_test_y_pred = []
+    epoch_test_y_true = []
+
     with torch.no_grad():
-        running_loss = 0.
-        running_corrects = 0
         for inputs, labels in test_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -248,15 +255,15 @@ for epoch in range(num_epochs):
             running_loss += loss.item()
             running_corrects += torch.sum(preds == labels.data).item()
 
-            # Save predictions and true labels
-            test_y_pred.extend(preds.cpu().numpy())
-            test_y_true.extend(labels.cpu().numpy())
+            # Save predictions and true labels for epoch-wise accuracy calculation
+            epoch_test_y_pred.extend(preds.cpu().numpy())
+            epoch_test_y_true.extend(labels.cpu().numpy())
 
-        epoch_loss = running_loss / len(test_dataset)
-        epoch_acc = running_corrects / len(test_dataset) * 100.
-        test_loss.append(epoch_loss)
-        test_accuracy.append(epoch_acc)
-        print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() - start_time))
+    epoch_loss = running_loss / len(test_dataset)
+    epoch_acc = accuracy_score(epoch_test_y_true, epoch_test_y_pred) * 100
+    test_loss.append(epoch_loss)
+    test_accuracy.append(epoch_acc)
+    print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() - start_time))
 
 df = pd.DataFrame({'Training Accuracy': train_accuracy, 'Test Accuracy': test_accuracy, 'Training Loss': train_loss, 'Test Loss':test_loss})
 print("Training: Selma (800), Test: Selma (400)")
