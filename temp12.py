@@ -258,6 +258,10 @@ for epoch in range(num_epochs):
         test_accuracy.append(epoch_acc)
         print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() - start_time))
 
+df = pd.DataFrame({'Training Accuracy': train_accuary, 'Test Accuracy': test_accuary, 'Training Loss': train_loss, 'Test Loss':test_loss})
+print("Training: Selma (800), Test: Selma (400)")
+print(df)
+
 # Calculate and print final training accuracy
 final_train_accuracy = accuracy_score(train_y_true, train_y_pred) * 100
 print("Final Training Accuracy: {:.2f}%".format(final_train_accuracy))
@@ -265,6 +269,9 @@ print("Final Training Accuracy: {:.2f}%".format(final_train_accuracy))
 # Calculate and print final test accuracy
 final_test_accuracy = accuracy_score(test_y_true, test_y_pred) * 100
 print("Final Test Accuracy: {:.2f}%".format(final_test_accuracy))
+
+num_classes = len(train_dataset.classes)
+class_names = ['day', 'fog', 'night', 'rain']
 
 # Plot learning curves
 plt.figure(figsize=(12, 4))
@@ -287,17 +294,23 @@ plt.legend()
 plt.show()
 plt.savefig('acc_loss_plot_uu-32_0_001.png')  # Save the loss plot
 
-# Classification Report and Confusion Matrix
-print("\nClassification Report:")
-print(classification_report(test_y_true, test_y_pred, target_names=list(train_dataset.classes)))
+classes = test_dataset.classes
+# Compute accuracy, confusion matrix, and classification report
+print("Accuracy on Training set: ", accuracy_score(y_true, y_pred))
+print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
+print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
 
-print("\nConfusion Matrix:")
-conf_matrix = confusion_matrix(test_y_true, test_y_pred)
-df_cm = pd.DataFrame(conf_matrix, index=list(train_dataset.classes), columns=list(train_dataset.classes))
-plt.figure(figsize=(10, 7))
-sn.heatmap(df_cm, annot=True, fmt='d', cmap='Blues')
-plt.ylabel('True label')
-plt.xlabel('Predicted label')
-plt.title('Confusion Matrix')
+# Create confusion matrix
+cm = confusion_matrix(y_true, y_pred)
+
+class_accuracies = cm.diagonal() / cm.sum(axis=1)
+for i, class_name in enumerate(class_names):
+    print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
+
+# Plot confusion matrix using ConfusionMatrixDisplay
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+fig, ax = plt.subplots(figsize=(10, 7))  # Increase figure size for better readability
+disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')  # Ensure annotations are integers
+plt.title('Confusion Matrix', fontsize=18)
 plt.show()
 plt.savefig('confusion_matrix_uavid-uavid_32_0_001.png', bbox_inches='tight')
