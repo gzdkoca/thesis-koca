@@ -258,7 +258,7 @@ for epoch in range(num_epochs):
         test_accuracy.append(epoch_acc)
         print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() - start_time))
 
-df = pd.DataFrame({'Training Accuracy': train_accuary, 'Test Accuracy': test_accuary, 'Training Loss': train_loss, 'Test Loss':test_loss})
+df = pd.DataFrame({'Training Accuracy': train_accuracy, 'Test Accuracy': test_accuracy, 'Training Loss': train_loss, 'Test Loss':test_loss})
 print("Training: Selma (800), Test: Selma (400)")
 print(df)
 
@@ -296,12 +296,11 @@ plt.savefig('acc_loss_plot_uu-32_0_001.png')  # Save the loss plot
 
 classes = test_dataset.classes
 # Compute accuracy, confusion matrix, and classification report
-print("Accuracy on Training set: ", accuracy_score(y_true, y_pred))
-print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
-print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
+print('Confusion matrix: \n', confusion_matrix(test_y_true, test_y_pred))
+print('Classification report: \n', classification_report(test_y_true, test_y_pred, target_names=class_names, zero_division=0))
 
 # Create confusion matrix
-cm = confusion_matrix(y_true, y_pred)
+cm = confusion_matrix(test_y_true, test_y_pred)
 
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
 for i, class_name in enumerate(class_names):
