@@ -263,7 +263,6 @@ for epoch in range(num_epochs):
     
     val_losses.append(running_loss / len(test_dataloader))
     val_accuracies.append(epoch_acc)
-    print(f"Epoch {epoch + 1}/{num_epochs}")
     print(f"Test Loss: {running_loss / len(test_dataloader):.4f}, Test Accuracy: {epoch_acc:.2f}%, Time Elapsed: {time.time() - start_time:.2f} seconds")
     
 print('Finished Training')
