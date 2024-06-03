@@ -235,8 +235,8 @@ for epoch in range(num_epochs):
     train_losses.append(running_loss / len(train_dataloader))
     train_accuracy = 100 * correct / total
     train_accuracies.append(train_accuracy)
-    print(f"Epoch {epoch + 1}/{num_epochs}, Training Loss: {running_loss / len(train_dataloader)}, Training Accuracy: {train_accuracy}%")
-    print(time.time() -start_time)
+    print(f"Epoch {epoch + 1}/{num_epochs}")
+    print(f"Training Loss: {running_loss / len(train_dataloader):.4f}, Training Accuracy: {train_accuracy:.2f}%, Time Elapsed: {time.time() - start_time:.2f} seconds")
     
     # Validation loop
     model.eval()
@@ -263,9 +263,9 @@ for epoch in range(num_epochs):
     
     val_losses.append(running_loss / len(test_dataloader))
     val_accuracies.append(epoch_acc)
-    print(f"Test Loss: {running_loss / len(test_dataloader)}, Test Accuracy: {epoch_acc}%")
-    print(time.time() -start_time)
-
+    print(f"Epoch {epoch + 1}/{num_epochs}")
+    print(f"Test Loss: {running_loss / len(test_dataloader):.4f}, Test Accuracy: {epoch_acc:.2f}%, Time Elapsed: {time.time() - start_time:.2f} seconds")
+    
 print('Finished Training')
 
 # Print final accuracies
@@ -284,6 +284,7 @@ epoch_data = {
 df = pd.DataFrame(epoch_data)
 print(df)
 
+cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
 for i, class_name in enumerate(class_names):
     print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
@@ -315,7 +316,6 @@ plt.show()
 plt.savefig('acc_loss_plot_uu-32_0_001-deneme2.png')  # Save the loss plot
    
 # Confusion Matrix
-cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_dataset.label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
 plt.show()
