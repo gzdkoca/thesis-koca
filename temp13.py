@@ -283,11 +283,6 @@ epoch_data = {
 df = pd.DataFrame(epoch_data)
 print(df)
 
-cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
-class_accuracies = cm.diagonal() / cm.sum(axis=1)
-for i, class_name in enumerate(class_names):
-    print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
-
 # Plotting accuracy and loss curves
 plt.figure(figsize=(12, 6))
 
@@ -313,9 +308,17 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 plt.savefig('acc_loss_plot_uu-32_0_001-deneme2.png')  # Save the loss plot
-   
+
+print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
+print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
+
 # Confusion Matrix
+cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_dataset.label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
 plt.show()
 plt.savefig('confusion_matrix_uavid-uavid_32_0_001-deneme2.png', bbox_inches='tight')
+
+class_accuracies = cm.diagonal() / cm.sum(axis=1)
+for i, class_name in enumerate(class_names):
+    print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
