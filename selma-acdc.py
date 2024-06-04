@@ -192,7 +192,7 @@ imshow(out, title=" | ".join(titles))
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Load the pre-trained ResNet18 model
-model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)  # Updated line
+model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)  
 
 # Modify the final layer to match the number of classes
 num_ftrs = model.fc.in_features
