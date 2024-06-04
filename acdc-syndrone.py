@@ -149,10 +149,6 @@ train_dataset.print_class_distribution()
 print("\nTest Dataset:")
 test_dataset.print_class_distribution()
 
-# Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
     input = input.numpy().transpose((1, 2, 0))
