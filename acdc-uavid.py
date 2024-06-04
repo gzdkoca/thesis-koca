@@ -118,11 +118,11 @@ class CustomDataset(Dataset):
         return image, label
 
 # Define the root directory of your dataset
-root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
+root_dir_train = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC'
 root_dir_test = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID'
 
 # Define the paths to your train and test data files
-train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt'
+train_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt'
 test_data_file = r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/test.txt'
 
 # Define the transformations
@@ -146,8 +146,8 @@ except Exception as e:
     print(f"Error initializing dataset: {e}")
 
 # Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 print('Train dataset size:', len(train_dataset))
 print('Test dataset size:', len(test_dataset))
@@ -187,166 +187,147 @@ print("Titles:", titles)
 
 imshow(out, title=" | ".join(titles))
 
- 
-# Define the network architecture
-model = models.resnet18(pretrained=True)
-num_features = model.fc.in_features
-model.fc = nn.Linear(num_features, 4)  # 4 output classes
+###  2
 
-# Move model to GPU if available
+# Define the device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Load the pre-trained ResNet18 model
+model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)  # Updated line
+
+# Modify the final layer to match the number of classes
+num_ftrs = model.fc.in_features
+model.fc = nn.Linear(num_ftrs, len(train_dataset.classes))
+
+# Move the model to the appropriate device
 model = model.to(device)
 
-# Adding a fully-connected layer for classification
-model.fc = nn.Linear(num_features, 4)
-model = model.to(device)
-
-# loss Function and optimizer
+# Define the loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-torch.manual_seed(42)
-torch.cuda.manual_seed(42)
-
-def class_accuracy(model, dataloader, num_classes):
-    class_correct = list(0. for _ in range(num_classes))
-    class_total = list(0. for _ in range(num_classes))
-
-    model.eval()
-    with torch.no_grad():
-        for inputs, labels in dataloader:
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            outputs = model(inputs)
-            _, predicted = torch.max(outputs, 1)
-            c = (predicted == labels).squeeze()
-            for i in range(len(labels)):
-                label = labels[i]
-                class_correct[label] += c[i].item()
-                class_total[label] += 1
-
-    class_accuracy = [class_correct[i] / class_total[i] * 100. if class_total[i] != 0 else 0 for i in range(num_classes)]
-    return class_accuracy
-
-train_loss = []
-train_accuary = []
-test_loss = []
-test_accuary = []
-y_pred = []
-y_true = []
-
+# Training loop
 num_epochs = 10
 start_time = time.time()
 
-for epoch in range(num_epochs):
-    print("Epoch {} running".format(epoch))
-    # Training
-    model.train()
-    running_loss = 0.
-    running_corrects = 0
+train_losses = []
+val_losses = []
+train_accuracies = []
+val_accuracies = []
 
-    for i, (inputs, labels) in enumerate(train_dataloader):
-        inputs = inputs.to(device)
-        labels = labels.to(device)
+for epoch in range(num_epochs):
+    model.train()
+    running_loss = 0.0
+    correct = 0
+    total = 0
+    for inputs, labels in train_dataloader:
+        inputs, labels = inputs.to(device), labels.to(device)
+        
+        # Zero the parameter gradients
         optimizer.zero_grad()
+        
+        # Forward pass
         outputs = model(inputs)
-        _, preds = torch.max(outputs, 1)
         loss = criterion(outputs, labels)
+        
+        # Backward pass and optimize
         loss.backward()
         optimizer.step()
+        
         running_loss += loss.item()
-        running_corrects += torch.sum(preds == labels.data).item()
-
-    epoch_loss = running_loss / len(train_dataset)
-    epoch_acc = running_corrects / len(train_dataset) * 100.
-    train_loss.append(epoch_loss)
-    train_accuary.append(epoch_acc)
-    print('[Train #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time() -start_time))
-
-    # Testing
+        
+        # Calculate training accuracy
+        _, predicted = torch.max(outputs, 1)
+        total += labels.size(0)
+        correct += (predicted == labels).sum().item()
+    
+    train_losses.append(running_loss / len(train_dataloader))
+    train_accuracy = 100 * correct / total
+    train_accuracies.append(train_accuracy)
+    print(f"Epoch {epoch + 1}/{num_epochs}")
+    print(f"Training Loss: {running_loss / len(train_dataloader):.4f}, Training Accuracy: {train_accuracy:.2f}%, Time: {time.time() - start_time:.2f} seconds")
+    
+    # Validation loop
     model.eval()
+    running_loss = 0.0
+    y_true = []
+    y_pred = []
+    
     with torch.no_grad():
-        running_loss = 0.
-        running_corrects = 0
         for inputs, labels in test_dataloader:
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
-            _, preds = torch.max(outputs, 1)
             loss = criterion(outputs, labels)
             running_loss += loss.item()
-            running_corrects += torch.sum(preds == labels.data).item()
+            
+            _, preds = torch.max(outputs, 1)
+            y_true.extend(labels.cpu().numpy())
+            y_pred.extend(preds.cpu().numpy())
+    
+    # Calculate accuracy
+    correct_predictions = sum(np.array(y_true) == np.array(y_pred))
+    total_predictions = len(y_true)
+    epoch_acc = (correct_predictions / total_predictions) * 100.0
+    
+    val_losses.append(running_loss / len(test_dataloader))
+    val_accuracies.append(epoch_acc)
+    print(f"Test Loss: {running_loss / len(test_dataloader):.4f}, Test Accuracy: {epoch_acc:.2f}%, Time: {time.time() - start_time:.2f} seconds")
+    
+print('Finished Training')
 
-            # Save predictions and true labels
-            outputs = (torch.max(torch.exp(outputs), 1)[1]).data.cpu().numpy()
-            y_pred.extend(outputs) # Save Prediction
-            labels = labels.data.cpu().numpy()
-            y_true.extend(labels) # Save Truth
+# Print final accuracies
+print(f"Final Training Accuracy: {train_accuracies[-1]}%")
+print(f"Final Validation Accuracy: {val_accuracies[-1]}%")
 
-        epoch_loss = running_loss / len(test_dataset)
-        epoch_acc = running_corrects / len(test_dataset) * 100.
-        test_loss.append(epoch_loss)
-        test_accuary.append(epoch_acc)
-        print('[Test #{}] Loss: {:.4f} Acc: {:.4f}% Time: {:.4f}s'.format(epoch+1, epoch_loss, epoch_acc, time.time()- start_time))
+# Create a table with epoch-wise accuracy and loss
+epoch_data = {
+    'Epoch': list(range(1, num_epochs + 1)),
+    'Training Loss': train_losses,
+    'Test Loss': val_losses,
+    'Training Accuracy': train_accuracies,
+    'Test Accuracy': val_accuracies
+}
 
-# printing accuracy and loss values for training and test
-df = pd.DataFrame({'Training Accuracy': train_accuary, 'Test Accuracy': test_accuary, 'Training Loss': train_loss, 'Test Loss':test_loss})
-print("Training: Selma (800), Test: Selma (400)")
+df = pd.DataFrame(epoch_data)
 print(df)
 
-
-num_classes = len(train_dataset.classes)
-class_names = ['day', 'fog', 'night', 'rain']
-
-
-#####
-
-# Printing accuracy and loss plots
-
+# Plotting accuracy and loss curves
 plt.figure(figsize=(12, 6))
 
-# accuracy
+# Training and Test accuracy
 plt.subplot(1, 2, 1)
-plt.plot(np.arange(1, num_epochs+1), train_accuary, '-o')
-plt.plot(np.arange(1, num_epochs+1), test_accuary, '-o')
+plt.plot(np.arange(1, num_epochs+1), train_accuracies, '-o', label='Training Accuracy')
+plt.plot(np.arange(1, num_epochs+1), val_accuracies, '-o', label='Test Accuracy')
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
-plt.legend(['Train', 'Test'])
-plt.title('Train vs Test Accuracy over time')
+plt.legend()
+plt.title('Training and Test Accuracy over Epochs')
 plt.grid(True)
 
-
-# loss
+# Training and Test loss
 plt.subplot(1, 2, 2)
-plt.plot(np.arange(1, num_epochs+1), train_loss, '-o')
-plt.plot(np.arange(1, num_epochs+1), test_loss, '-o')
+plt.plot(np.arange(1, num_epochs+1), train_losses, '-o', label='Training Loss')
+plt.plot(np.arange(1, num_epochs+1), val_losses, '-o', label='Test Loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.legend(['Train', 'Test'])
-plt.title('Train vs Test Loss over time')
+plt.legend()
+plt.title('Training and Test Loss over Epochs')
 plt.grid(True)
-plt.savefig('acc_loss_plot_uu-16_0_0001.png')  # Save the loss plot
-
 plt.tight_layout()
 plt.show()
+plt.savefig('acc_loss_plot_acdc-uavid.png')  # Save the loss plot
 
-classes = test_dataset.classes
-# Compute accuracy, confusion matrix, and classification report
-print("Accuracy on Training set: ", accuracy_score(y_true, y_pred))
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
 
-# Create confusion matrix
-cm = confusion_matrix(y_true, y_pred)
+# Confusion Matrix
+cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_dataset.label_to_class[i] for i in range(4)])
+disp.plot(cmap=plt.cm.Blues)
+plt.show()
+plt.savefig('confusion_matrix_acdc-uavid.png', bbox_inches='tight')
 
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
 for i, class_name in enumerate(class_names):
     print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
-
-# Plot confusion matrix using ConfusionMatrixDisplay
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
-fig, ax = plt.subplots(figsize=(10, 7))  # Increase figure size for better readability
-disp.plot(cmap=plt.cm.Blues, ax=ax, values_format='d')  # Ensure annotations are integers
-plt.title('Confusion Matrix', fontsize=18)
-plt.show()
-plt.savefig('confusion_matrix_uavid-uavid_16_0_0001.png', bbox_inches='tight')
