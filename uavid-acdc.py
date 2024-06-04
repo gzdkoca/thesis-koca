@@ -130,8 +130,8 @@ except Exception as e:
     print(f"Error initializing dataset: {e}")
 
 # Create data loaders for training and testing
-train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-test_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+test_dataloader = DataLoader(test_dataset, batch_size=32, shuffle=False)
 
 print('Train dataset size:', len(train_dataset))
 print('Test dataset size:', len(test_dataset))
