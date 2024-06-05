@@ -52,7 +52,7 @@ class CustomDataset(Dataset):
                     print(f"Class name is None for path: {img_path}")
         return data
         
-        def get_label(self, img_path):
+    def get_label(self, img_path):
         img_path = img_path.replace('\\', '/')
         parts = img_path.split('/')
         
