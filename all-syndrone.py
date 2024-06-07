@@ -106,26 +106,20 @@ class CustomDataset(Dataset):
             image = self.transform(image)
         return image, label
 
-root_dirs_train = [
-    r'C:/Users/gozde/OneDrive/Masaüstü/UAVID/',
-    r'C:/Users/gozde/OneDrive/Masaüstü/ACDC/',
-    r'C:/Users/gozde/OneDrive/Masaüstü/SELMA/',
-    r'C:/Users/gozde/OneDrive/Masaüstü/Syndrone/'
+root_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/UAVID',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/SELMA',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
 ]
-root_dirs_test = [
-    r'C:/Users/gozde/OneDrive/Masaüstü/UAVID/'
-]
+root_dirs_test = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC']
 
 # Define the paths to your train and test data files
-train_data_files = [
-    r'C:/Users/gozde/OneDrive/Masaüstü/UAVID/train.txt',
-    r'C:/Users/gozde/OneDrive/Masaüstü/ACDC/train.txt',
-    r'C:/Users/gozde/OneDrive/Masaüstü/SELMA/train.txt',
-    r'C:/Users/gozde/OneDrive/Masaüstü/Syndrone/train.txt'
+train_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt', 
+                    r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt',
+                    r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt',
+                    r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
 ]
-test_data_files = [
-    r'C:/Users/gozde/OneDrive/Masaüstü/Syndrone/test.txt'
-]
+test_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt']
 
 # Define the transformations
 transform = transforms.Compose([
