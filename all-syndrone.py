@@ -2,12 +2,14 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 import numpy as np
 import seaborn as sn
 import pandas as pd
 import torchvision
 from torchvision import *
 from torch.utils.data import Dataset, DataLoader
+from torchvision.io import read_image
 import torchvision.transforms as T
 from torchvision import datasets, models, transforms
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, ConfusionMatrixDisplay
@@ -15,6 +17,8 @@ import matplotlib.pyplot as plt
 import time
 import copy
 from tabulate import tabulate
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from PIL import Image
 from torch.utils.data import ConcatDataset
 
 class CustomDataset(Dataset):
