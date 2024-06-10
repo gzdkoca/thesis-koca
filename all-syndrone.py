@@ -168,13 +168,13 @@ def print_combined_class_distribution(combined_dataset):
     print("Class Distribution:")
     for class_name, count in combined_class_counts.items():
         print(f"{class_name}: {count}")
-
+"""
 # Print class distribution for the combined train and test datasets
 print("\nTraining Dataset:")
 print_combined_class_distribution(combined_train_dataset)
 print("\nTest Dataset:")
 print_combined_class_distribution(combined_test_dataset)
-
+"""
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
     input = input.numpy().transpose((1, 2, 0))
@@ -211,7 +211,7 @@ model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
 
 # Modify the final layer to match the number of classes
 num_ftrs = model.fc.in_features
-model.fc = nn.Linear(num_ftrs, len(train_dataset.classes))
+model.fc = nn.Linear(num_ftrs, 4)
 
 # Move the model to the appropriate device
 model = model.to(device)
@@ -337,7 +337,7 @@ print('Classification report: \n', classification_report(y_true, y_pred, target_
 
 # Confusion Matrix
 cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_dataset.label_to_class[i] for i in range(4)])
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[combined_train_dataset.label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
 plt.show()
 plt.savefig('confusion_matrix_all-syndrone.png', bbox_inches='tight')
