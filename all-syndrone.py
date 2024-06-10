@@ -330,17 +330,20 @@ plt.title('Training and Test Loss over Epochs')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-plt.savefig('acc_loss_plot_all-syndrone.png')  # Save the loss plot
+plt.savefig('acc_loss_plot_all-syndrone-2.png')  # Save the loss plot
 
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred, target_names=train_classes, zero_division=0))
 
 # Confusion Matrix
 cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[combined_train_dataset.label_to_class[i] for i in range(4)])
+label_to_class = combined_train_dataset.datasets[0].label_to_class
+# Create the ConfusionMatrixDisplay
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
+
 plt.show()
-plt.savefig('confusion_matrix_all-syndrone.png', bbox_inches='tight')
+plt.savefig('confusion_matrix_all-syndrone-2.png', bbox_inches='tight')
 
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
 for i, class_name in enumerate(class_names):
