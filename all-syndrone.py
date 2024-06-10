@@ -115,7 +115,7 @@ root_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC',
                    r'/nfsd/lttm4/tesisti/koca/datasets/SELMA',
                    r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
 ]
-root_dirs_test = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC']
+root_dirs_test = [r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone']
 
 # Define the paths to your train and test data files
 train_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt', 
@@ -123,7 +123,7 @@ train_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt',
                     r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt',
                     r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
 ]
-test_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt']
+test_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/test.txt']
 
 # Define the transformations
 transform = transforms.Compose([
