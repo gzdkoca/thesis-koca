@@ -333,7 +333,7 @@ plt.show()
 plt.savefig('acc_loss_plot_all-syndrone.png')  # Save the loss plot
 
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
-print('Classification report: \n', classification_report(y_true, y_pred, target_names=class_names, zero_division=0))
+print('Classification report: \n', classification_report(y_true, y_pred, target_names=train_classes, zero_division=0))
 
 # Confusion Matrix
 cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
