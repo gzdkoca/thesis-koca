@@ -168,13 +168,13 @@ def print_combined_class_distribution(combined_dataset):
     print("Class Distribution:")
     for class_name, count in combined_class_counts.items():
         print(f"{class_name}: {count}")
-"""
+
 # Print class distribution for the combined train and test datasets
 print("\nTraining Dataset:")
 print_combined_class_distribution(combined_train_dataset)
 print("\nTest Dataset:")
 print_combined_class_distribution(combined_test_dataset)
-"""
+
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
     input = input.numpy().transpose((1, 2, 0))
@@ -338,7 +338,7 @@ print('Classification report: \n', classification_report(y_true, y_pred, target_
 # Confusion Matrix
 cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3])
 label_to_class = combined_train_dataset.datasets[0].label_to_class
-# Create the ConfusionMatrixDisplay
+
 disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
 
@@ -346,5 +346,5 @@ plt.show()
 plt.savefig('confusion_matrix_all-syndrone-2.png', bbox_inches='tight')
 
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
-for i, class_name in enumerate(class_names):
+for i, class_name in enumerate(train_classes):
     print(f'Accuracy for {class_name}: {class_accuracies[i]*100:.2f}%')
