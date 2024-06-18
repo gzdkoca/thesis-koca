@@ -168,13 +168,13 @@ def print_combined_class_distribution(combined_dataset):
     print("Class Distribution:")
     for class_name, count in combined_class_counts.items():
         print(f"{class_name}: {count}")
-
+"""
 # Print class distribution for the combined train and test datasets
 print("\nTraining Dataset:")
 print_combined_class_distribution(combined_train_dataset)
 print("\nTest Dataset:")
 print_combined_class_distribution(combined_test_dataset)
-
+"""
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
     input = input.numpy().transpose((1, 2, 0))
@@ -221,7 +221,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Training loop
-num_epochs = 5
+num_epochs = 10
 start_time = time.time()
 
 train_losses = []
