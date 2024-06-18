@@ -91,6 +91,16 @@ class CustomDataset(Dataset):
             print(f"Class name is None for path: {img_path}")
         return self.class_to_label.get(class_name, None)
 
+    def print_class_distribution(self):
+        class_counts = {class_name: 0 for class_name in self.classes}
+        for _, label in self.data:
+            class_name = self.label_to_class.get(label)
+            if class_name in self.classes:  # Ensure only desired classes are counted
+                class_counts[class_name] += 1
+        print("Class Distribution:")
+        for class_name, count in class_counts.items():
+            print(f"{class_name}: {count}")
+    
     def __len__(self):
         return len(self.data)
 
@@ -101,18 +111,20 @@ class CustomDataset(Dataset):
             image = self.transform(image)
         return image, label
 
-transform = transforms.Compose([
-    transforms.Resize((540, 960)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-
-root_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC', r'/nfsd/lttm4/tesisti/koca/datasets/UAVID', r'/nfsd/lttm4/tesisti/koca/datasets/SELMA', r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone']
+oot_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/UAVID',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/SELMA',
+                   r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
+]
 root_dirs_test = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC']
 
-train_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt', r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt', r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt', r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt']
+# Define the paths to your train and test data files
+train_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/train.txt', 
+                    r'/nfsd/lttm4/tesisti/koca/datasets/UAVID/train.txt',
+                    r'/nfsd/lttm4/tesisti/koca/datasets/SELMA/train.txt',
+                    r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone/train.txt'
+]
 test_data_files = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC/test.txt']
-
 
 transform = transforms.Compose([
     transforms.Resize((540, 960)),
@@ -135,9 +147,6 @@ test_loader = DataLoader(combined_test_dataset, batch_size=32, shuffle=False, nu
 # Print dataset sizes
 print('Train dataset size:', len(combined_train_dataset))
 print('Test dataset size:', len(combined_test_dataset))
-
-# Since combined_train_dataset and combined_test_dataset are instances of ConcatDataset,
-# we need to access the classes attribute of the first dataset in each.
 
 # Get classes from the first dataset and convert to lists
 train_classes = list(combined_train_dataset.datasets[0].classes)
@@ -166,7 +175,6 @@ print("\nTraining Dataset:")
 print_combined_class_distribution(combined_train_dataset)
 print("\nTest Dataset:")
 print_combined_class_distribution(combined_test_dataset)
-
 
 # Helper function to unnormalize and display images
 def imshow(input, title=None):
