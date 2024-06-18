@@ -47,6 +47,7 @@ class CustomDataset(Dataset):
     
     def load_data(self, data_file):
         data = []
+        print(f"Loading data from: {data_file}")
         with open(data_file, 'r') as f:
             lines = f.readlines()
             for line in lines:
@@ -111,7 +112,7 @@ class CustomDataset(Dataset):
             image = self.transform(image)
         return image, label
 
-oot_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC',
+root_dirs_train = [r'/nfsd/lttm4/tesisti/koca/datasets/ACDC',
                    r'/nfsd/lttm4/tesisti/koca/datasets/UAVID',
                    r'/nfsd/lttm4/tesisti/koca/datasets/SELMA',
                    r'/nfsd/lttm4/tesisti/koca/datasets/Syndrone'
