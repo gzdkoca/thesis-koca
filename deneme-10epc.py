@@ -306,7 +306,7 @@ plt.savefig('acc_plot_all-deneme.png')  # Save the loss plot
 
 # Confusion Matrix
 cm = confusion_matrix(all_labels, all_preds, labels=[0, 1, 2, 3])
-disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_dataset.label_to_class[i] for i in range(4)])
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[train_datasets.label_to_class[i] for i in range(4)])
 disp.plot(cmap=plt.cm.Blues)
 plt.show()
 plt.savefig('confusion_matrix_all-deneme.png', bbox_inches='tight')
