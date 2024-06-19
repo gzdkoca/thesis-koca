@@ -221,7 +221,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 # Training loop
-num_epochs = 5
+num_epochs = 10
 start_time = time.time()
 
 train_losses = []
@@ -330,7 +330,7 @@ plt.title('Training and Test Loss over Epochs')
 plt.grid(True)
 plt.tight_layout()
 plt.show()
-plt.savefig('acc_loss_plot_all-selma.png')  # Save the loss plot
+plt.savefig('acc_loss_plot_all-selma-son.png')  # Save the loss plot
 
 print('Confusion matrix: \n', confusion_matrix(y_true, y_pred))
 print('Classification report: \n', classification_report(y_true, y_pred, target_names=train_classes, zero_division=0))
@@ -343,7 +343,7 @@ disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[label_to_clas
 disp.plot(cmap=plt.cm.Blues)
 
 plt.show()
-plt.savefig('confusion_matrix_all-selma.png', bbox_inches='tight')
+plt.savefig('confusion_matrix_all-selma-son.png', bbox_inches='tight')
 
 class_accuracies = cm.diagonal() / cm.sum(axis=1)
 for i, class_name in enumerate(train_classes):
