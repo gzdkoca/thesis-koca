@@ -290,6 +290,9 @@ for epoch in range(num_epochs):
     
 print('Finished Training')
 
+torch.save(model.state_dict(), 'model_all_acdc.pth')
+torch.save(model, 'model_all_acdc_full.pth')
+
 # save the model
 torch.save(model.state_dict(), 'model_all_acdc.pth')
 torch.save(model, 'model_all_acdc_full.pth')
