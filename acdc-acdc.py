@@ -276,6 +276,10 @@ for epoch in range(num_epochs):
     
 print('Finished Training')
 
+# save the model
+torch.save(model.state_dict(), 'model_acdc_acdc.pth')
+torch.save(model, 'model_acdc_acdc_full.pth')
+
 # Print final accuracies
 print(f"Final Training Accuracy: {train_accuracies[-1]}%")
 print(f"Final Validation Accuracy: {val_accuracies[-1]}%")
