@@ -275,6 +275,10 @@ for epoch in range(num_epochs):
     
 print('Finished Training')
 
+# save the model
+torch.save(model.state_dict(), 'model_selma_uavid.pth')
+torch.save(model, 'model_selma_uavid_full.pth')
+
 # Print final accuracies
 print(f"Final Training Accuracy: {train_accuracies[-1]}%")
 print(f"Final Validation Accuracy: {val_accuracies[-1]}%")
